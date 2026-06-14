@@ -53,6 +53,20 @@ class OptimizeRequest(BaseModel):
     parallel: bool = True
 
 
+class AdviceRequest(BaseModel):
+    """当前持仓分析：根据实际仓位 + 最优参数 + 最新价格，给出即时操作建议"""
+    current_shares: float = Field(..., gt=0)          # 当前持仓股数
+    current_cash: float = 0.0                          # 当前现金
+    entry_price: float = Field(..., gt=0)              # 你的入场/成本价
+    highest_since_entry: Optional[float] = None        # 入场后见过的最高价，不填默认取 current_price
+    status: str = "holding"                            # "holding" 持有中 | "waiting_to_buy" 已卖出
+    sell_price: Optional[float] = None                 # 如已卖出，填卖出成交价
+    current_price: float = Field(..., gt=0)            # 最新价格
+    d: float = Field(..., gt=0, le=1)                  # 卖出触发阈值
+    r: float = Field(..., gt=0, le=1)                  # 补仓再跌幅度
+    s: float = Field(0.5, gt=0, le=1)                 # 卖出比例
+
+
 class SimulateRequest(BaseModel):
     bars: List[Bar]
     initial_shares: float = 1000.0

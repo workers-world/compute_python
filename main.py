@@ -8,8 +8,9 @@ from contextlib import asynccontextmanager
 import numpy as np
 from fastapi import FastAPI, HTTPException
 
-from engine import compute_metrics, simulate
+from engine import _build_instruction, compute_metrics, simulate
 from models import (
+    AdviceRequest,
     Objective,
     OptimizationMetrics,
     OptimizeRequest,
@@ -43,6 +44,28 @@ app = FastAPI(title="Strategy Optimizer", version="1.0.0", lifespan=lifespan)
 @app.get("/api/health")
 async def health():
     return {"status": "ok"}
+
+
+@app.post("/api/advice")
+async def advice_endpoint(req: AdviceRequest):
+    """根据当前持仓 + 最优参数 + 最新价格，给出即时操作建议（不跑历史模拟）"""
+    highest = req.highest_since_entry or max(req.current_price, req.entry_price)
+    if req.status == "holding":
+        instruction = _build_instruction(
+            0, req.current_price, highest, req.entry_price, None,
+            req.current_shares, req.current_cash,
+            req.current_shares * req.current_price + req.current_cash,
+            req.d, req.r,
+        )
+    else:
+        sp = req.sell_price or req.entry_price
+        instruction = _build_instruction(
+            1, req.current_price, 0, 0, sp,
+            req.current_shares, req.current_cash,
+            req.current_shares * req.current_price + req.current_cash,
+            req.d, req.r,
+        )
+    return {"instruction": instruction}
 
 
 @app.post("/api/simulate", response_model=SimulateResult)
