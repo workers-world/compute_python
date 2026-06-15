@@ -211,6 +211,63 @@ def _idx_to_date(dates: Optional[List], idx: int) -> Optional[str]:
     return None
 
 
+def compute_scenario_table(
+    current_price: float,
+    current_shares: float,
+    avg_cost: float,
+    highest_since: float,
+    d_values: list,
+    r_values: list,
+    sell_ratio: float = 0.2,
+    commission_rate: float = 0.0,
+    slippage_bps: float = 0.0,
+) -> list:
+    """按用户图片格式，为每个 (d, r) 组合生成场景分析行。"""
+    invested = round(current_shares * avg_cost, 2)
+    gap_per_g = round(current_price - avg_cost, 2)
+    loss_rate = round((current_price - avg_cost) / avg_cost * 100, 2)
+    total_loss = round(current_shares * (current_price - avg_cost), 2)
+
+    rows = []
+    for d in d_values:
+        for r in r_values:
+            sell_trigger = round(highest_since * (1 - d), 2)
+            buy_trigger = round(sell_trigger * (1 - r), 2) if sell_trigger > 0 else 0
+
+            # 卖出行
+            sell_qty = round(current_shares * sell_ratio, 4)
+            sell_price = sell_trigger  # 触发价即卖价
+            recovered = round(sell_qty * sell_price, 2)
+
+            # 买入行
+            remain_shares = current_shares - sell_qty
+            remain_value = remain_shares * current_price
+            buy_qty = round(recovered / buy_trigger, 4) if buy_trigger > 0 else 0
+            buy_cash = round(buy_qty * buy_trigger, 2)
+
+            rows.append({
+                "d": round(d, 4),
+                "r": round(r, 4),
+                "current_shares": current_shares,
+                "avg_cost": avg_cost,
+                "invested": invested,
+                "current_price": current_price,
+                "gap_per_g": gap_per_g,
+                "loss_rate": loss_rate,
+                "total_loss": total_loss,
+                "sell_ratio": sell_ratio,
+                "sell_trigger": sell_trigger,
+                "sell_qty": sell_qty,
+                "recovered_cash": recovered,
+                "remain_shares": remain_shares,
+                "buy_trigger": buy_trigger,
+                "buy_ratio": 1.0,
+                "buy_qty": buy_qty,
+                "buy_cash": buy_cash,
+            })
+    return rows
+
+
 def compute_metrics(
     final_shares: float,
     cash: float,

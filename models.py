@@ -53,6 +53,16 @@ class OptimizeRequest(BaseModel):
     parallel: bool = True
 
 
+class ScenarioTableRequest(BaseModel):
+    current_price: float = Field(..., gt=0)
+    current_shares: float = Field(..., gt=0)
+    avg_cost: float = Field(..., gt=0)
+    highest_since: Optional[float] = None
+    d_values: List[float]
+    r_values: List[float]
+    sell_ratio: float = 0.2
+
+
 class AdviceRequest(BaseModel):
     """当前持仓分析：根据实际仓位 + 最优参数 + 最新价格，给出即时操作建议"""
     current_shares: float = Field(..., gt=0)          # 当前持仓股数

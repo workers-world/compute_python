@@ -8,13 +8,14 @@ from contextlib import asynccontextmanager
 import numpy as np
 from fastapi import FastAPI, HTTPException
 
-from engine import _build_instruction, compute_metrics, simulate
+from engine import _build_instruction, compute_metrics, compute_scenario_table, simulate
 from models import (
     AdviceRequest,
     Objective,
     OptimizationMetrics,
     OptimizeRequest,
     OptimizeResult,
+    ScenarioTableRequest,
     SimulateRequest,
     SimulateResult,
     SurfaceData,
@@ -66,6 +67,16 @@ async def advice_endpoint(req: AdviceRequest):
             req.d, req.r,
         )
     return {"instruction": instruction}
+
+
+@app.post("/api/scenario-table")
+async def scenario_table_endpoint(req: ScenarioTableRequest):
+    highest = req.highest_since or max(req.current_price, req.avg_cost)
+    rows = compute_scenario_table(
+        req.current_price, req.current_shares, req.avg_cost, highest,
+        req.d_values, req.r_values, req.sell_ratio,
+    )
+    return {"rows": rows}
 
 
 @app.post("/api/simulate", response_model=SimulateResult)
