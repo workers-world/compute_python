@@ -231,6 +231,8 @@ def compute_scenario_table(
     r_values: list,
     sell_ratio: float = 0.2,
     sell_direction: str = "drop",
+    max_sell_price: float | None = None,
+    min_buy_price: float | None = None,
     commission_rate: float = 0.0,
     slippage_bps: float = 0.0,
 ) -> list:
@@ -248,6 +250,11 @@ def compute_scenario_table(
             else:
                 sell_trigger = round(highest_since * (1 - d), 2)
             buy_trigger = round(sell_trigger * (1 - r), 2) if sell_trigger > 0 else 0
+            # 约束过滤：卖价超上限或买价低下限的跳过
+            if max_sell_price and sell_trigger > max_sell_price:
+                continue
+            if min_buy_price and buy_trigger < min_buy_price:
+                continue
 
             # 卖出行
             sell_qty = round(current_shares * sell_ratio, 4)

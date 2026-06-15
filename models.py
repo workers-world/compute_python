@@ -62,6 +62,8 @@ class ScenarioTableRequest(BaseModel):
     r_values: List[float]
     sell_ratio: float = 0.2
     sell_direction: str = "drop"
+    max_sell_price: Optional[float] = None
+    min_buy_price: Optional[float] = None
 
 
 class AdviceRequest(BaseModel):
