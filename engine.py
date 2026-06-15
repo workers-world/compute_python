@@ -219,6 +219,7 @@ def compute_scenario_table(
     d_values: list,
     r_values: list,
     sell_ratio: float = 0.2,
+    sell_direction: str = "drop",
     commission_rate: float = 0.0,
     slippage_bps: float = 0.0,
 ) -> list:
@@ -231,7 +232,10 @@ def compute_scenario_table(
     rows = []
     for d in d_values:
         for r in r_values:
-            sell_trigger = round(highest_since * (1 - d), 2)
+            if sell_direction == "rise":
+                sell_trigger = round(current_price * (1 + d), 2)
+            else:
+                sell_trigger = round(highest_since * (1 - d), 2)
             buy_trigger = round(sell_trigger * (1 - r), 2) if sell_trigger > 0 else 0
 
             # 卖出行

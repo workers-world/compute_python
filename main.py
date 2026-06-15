@@ -74,7 +74,7 @@ async def scenario_table_endpoint(req: ScenarioTableRequest):
     highest = req.highest_since or max(req.current_price, req.avg_cost)
     rows = compute_scenario_table(
         req.current_price, req.current_shares, req.avg_cost, highest,
-        req.d_values, req.r_values, req.sell_ratio,
+        req.d_values, req.r_values, req.sell_ratio, req.sell_direction,
     )
     return {"rows": rows}
 

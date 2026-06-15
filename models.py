@@ -61,6 +61,7 @@ class ScenarioTableRequest(BaseModel):
     d_values: List[float]
     r_values: List[float]
     sell_ratio: float = 0.2
+    sell_direction: str = "drop"
 
 
 class AdviceRequest(BaseModel):
