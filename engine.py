@@ -25,6 +25,10 @@ from models import CycleDetail
 TRADING_DAYS_PER_YEAR = 252
 
 
+# ══ 核心交易模拟引擎 ══
+# 逐 Bar 遍历价格序列，按"下跌卖出→再跌补回"策略执行买卖。
+# 维护入场后最高点，严格按时间顺序避免前视偏差。
+# 返回最终股数、现金、日收益率序列、每次循环明细和当前操作指令。
 def simulate(
     closes: np.ndarray,
     highs: np.ndarray,
@@ -88,11 +92,11 @@ def simulate(
         close_i = closes[i]
 
         if state == 0:
-            # 更新最高点（前视偏差保护：high_i 是当天数据，允许当天使用）
+            # 【持有中】更新入场后最高点，检测是否触发卖出
             if high_i > highest:
                 highest = high_i
 
-            # 检查卖出条件：从最高点下跌 >= d
+            # 卖出条件：当前价从最高点下跌幅度 ≥ d
             if highest > 0 and (highest - close_i) / highest >= d:
                 # 执行卖出
                 sell_qty = shares * s
@@ -102,8 +106,8 @@ def simulate(
                 state = 1
                 sell_idx = i
 
-        else:  # state == 1，已卖出，等待买入
-            # 检查买入条件：从卖出价再次下跌 >= r
+        else:
+            # 【已卖出等买入】检测从卖出价再跌幅度是否 ≥ r
             if sell_price > 0 and (sell_price - close_i) / sell_price >= r:
                 # 全部现金买入
                 buy_price = close_i * (1 + slippage_bps / 10000)
@@ -155,6 +159,10 @@ def simulate(
     return shares, cash, daily_returns.tolist(), cycles, instruction
 
 
+# ══ 操作指令生成 ══
+# 根据模拟结束时的状态，输出当前该做什么：
+#   holding = 持有中，给出卖出触发价
+#   waiting_to_buy = 已卖出等补仓，给出买入触发价
 def _build_instruction(state, current_price, highest, entry_price, sell_price,
                        shares, cash, total_value, d, r):
     if state == 0:
@@ -211,6 +219,9 @@ def _idx_to_date(dates: Optional[List], idx: int) -> Optional[str]:
     return None
 
 
+# ══ 场景分析表格生成 ══
+# 不跑历史模拟，直接根据当前持仓和每个 (d, r) 组合计算：
+#   市场状态 → 卖出后 → 买入后 → 最终持仓和净增克数
 def compute_scenario_table(
     current_price: float,
     current_shares: float,
@@ -279,6 +290,8 @@ def compute_scenario_table(
     return rows
 
 
+# ══ 绩效指标计算 ══
+# 根据模拟结果计算 Sharpe、Calmar、Sortino、最大回撤、胜率等。
 def compute_metrics(
     final_shares: float,
     cash: float,

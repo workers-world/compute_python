@@ -41,15 +41,17 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Strategy Optimizer", version="1.0.0", lifespan=lifespan)
 
+# ── 健康检查 ──
 
 @app.get("/api/health")
 async def health():
     return {"status": "ok"}
 
 
+# ── 即时操作建议：根据实际持仓 + 参数，告诉用户现在该做什么 ──
+
 @app.post("/api/advice")
 async def advice_endpoint(req: AdviceRequest):
-    """根据当前持仓 + 最优参数 + 最新价格，给出即时操作建议（不跑历史模拟）"""
     highest = req.highest_since_entry or max(req.current_price, req.entry_price)
     if req.status == "holding":
         instruction = _build_instruction(
@@ -69,6 +71,8 @@ async def advice_endpoint(req: AdviceRequest):
     return {"instruction": instruction}
 
 
+# ── 场景分析表格：每个 (d, r) 组合的卖出/买入数值明细 ──
+
 @app.post("/api/scenario-table")
 async def scenario_table_endpoint(req: ScenarioTableRequest):
     highest = req.highest_since or max(req.current_price, req.avg_cost)
@@ -78,6 +82,8 @@ async def scenario_table_endpoint(req: ScenarioTableRequest):
     )
     return {"rows": rows}
 
+
+# ── 单参数模拟：用指定 d/r/s 在完整历史上回放策略 ──
 
 @app.post("/api/simulate", response_model=SimulateResult)
 async def simulate_endpoint(req: SimulateRequest):
@@ -106,6 +112,8 @@ async def simulate_endpoint(req: SimulateRequest):
         instruction=TradeInstruction(**instruction) if instruction else None,
     )
 
+
+# ── 参数优化：TPE 贝叶斯搜索或网格遍历，找最优 d/r ──
 
 @app.post("/api/optimize", response_model=OptimizeResult)
 async def optimize_endpoint(req: OptimizeRequest):
