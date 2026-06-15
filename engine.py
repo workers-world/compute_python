@@ -239,11 +239,14 @@ def compute_scenario_table(
             sell_price = sell_trigger  # 触发价即卖价
             recovered = round(sell_qty * sell_price, 2)
 
-            # 买入行
+            # 买入后结果
             remain_shares = current_shares - sell_qty
-            remain_value = remain_shares * current_price
             buy_qty = round(recovered / buy_trigger, 4) if buy_trigger > 0 else 0
             buy_cash = round(buy_qty * buy_trigger, 2)
+            final_shares = round(remain_shares + buy_qty, 4)
+            net_gain = round(final_shares - current_shares, 4)
+            final_value = round(final_shares * current_price, 2)
+            remain_cash = round(recovered - buy_cash, 2)
 
             rows.append({
                 "d": round(d, 4),
@@ -264,6 +267,10 @@ def compute_scenario_table(
                 "buy_ratio": 1.0,
                 "buy_qty": buy_qty,
                 "buy_cash": buy_cash,
+                "final_shares": final_shares,
+                "net_gain": net_gain,
+                "final_value": final_value,
+                "remain_cash": remain_cash,
             })
     return rows
 
