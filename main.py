@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 import logging
+import time
 from contextlib import asynccontextmanager
 
 import numpy as np
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 
 from engine import _build_instruction, compute_metrics, compute_scenario_table, simulate
 from models import (
@@ -40,6 +41,15 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="Strategy Optimizer", version="1.0.0", lifespan=lifespan)
+
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    start = time.perf_counter()
+    response = await call_next(request)
+    elapsed = time.perf_counter() - start
+    print(f"[DOCKER] {request.method} {request.url.path} → {response.status_code} ({elapsed:.3f}s)", flush=True)
+    logger.info("%s %s → %s (%.3fs)", request.method, request.url.path, response.status_code, elapsed)
+    return response
 
 # ── 健康检查 ──
 
