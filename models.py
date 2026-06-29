@@ -42,14 +42,16 @@ class OptimizeRequest(BaseModel):
     initial_shares: float = 1000.0
     param_d: ParamRange
     param_r: ParamRange
-    param_s: Optional[ParamRange] = None         # None = 固定 sell_ratio
+    param_s: Optional[ParamRange] = None
     sell_ratio: float = 0.5
-    commission_rate: float = 0.0003              # 万三
-    slippage_bps: float = 2.0
+    commission_rate: float = 0.0001
+    bid_ask_spread: float = 0.004
+    slippage_bps: float = 0.0
+    min_cycles: int = 0
     objective: Objective = Objective.SHARPE_RATIO
     optimizer: OptimizerType = OptimizerType.TPE
     n_trials: int = 200
-    wfo_windows: int = 0                         # 0 = 不启用
+    wfo_windows: int = 0
     parallel: bool = True
 
 
@@ -64,6 +66,9 @@ class ScenarioTableRequest(BaseModel):
     sell_direction: str = "drop"
     max_sell_price: Optional[float] = None
     min_buy_price: Optional[float] = None
+    commission_rate: float = 0.0001
+    bid_ask_spread: float = 0.004
+    slippage_bps: float = 0.0
 
 
 class AdviceRequest(BaseModel):
@@ -86,8 +91,9 @@ class SimulateRequest(BaseModel):
     d: float = Field(..., gt=0, le=1)
     r: float = Field(..., gt=0, le=1)
     s: float = Field(0.5, gt=0, le=1)
-    commission_rate: float = 0.0003
-    slippage_bps: float = 2.0
+    commission_rate: float = 0.0001
+    bid_ask_spread: float = 0.004
+    slippage_bps: float = 0.0
 
 
 # ── response ─────────────────────────────────────────────
@@ -117,6 +123,12 @@ class OptimizationMetrics(BaseModel):
     win_rate: Optional[float] = None
     profit_factor: Optional[float] = None
     total_cycles: int = 0
+    insufficient_trades: bool = False
+
+
+class EquityPoint(BaseModel):
+    date: Optional[str] = None
+    value: float
 
 
 class SurfaceData(BaseModel):
@@ -137,7 +149,8 @@ class WfoWindow(BaseModel):
 
 class WfoReport(BaseModel):
     windows: List[WfoWindow]
-    param_stability_score: float      # 0~1, 各窗口最优参数标准差归一化
+    param_stability_score: float
+    oos_metrics: Optional[dict] = None
 
 
 class TradeInstruction(BaseModel):
@@ -158,6 +171,8 @@ class SimulateResult(BaseModel):
     metrics: OptimizationMetrics
     cycles: List[CycleDetail]
     instruction: Optional[TradeInstruction] = None
+    equity_curve: List[EquityPoint] = []
+    benchmark_curve: List[EquityPoint] = []
 
 
 class OptimizeResult(BaseModel):
@@ -167,3 +182,6 @@ class OptimizeResult(BaseModel):
     wfo_report: Optional[WfoReport] = None
     overfit_warning: bool = False
     elapsed_seconds: float = 0.0
+    equity_curve: List[EquityPoint] = []
+    benchmark_curve: List[EquityPoint] = []
+    oos_metrics: Optional[dict] = None
