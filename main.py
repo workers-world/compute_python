@@ -31,8 +31,8 @@ from models import (
 from optimizer import optimize
 from wfo import walk_forward
 
+# 仅 stdout：容器 / CF Containers 靠标准输出采集日志；本机 start.sh 同样可见
 logging.basicConfig(
-    filename="strategy_optimizer.log",
     level=logging.INFO,
     format="%(asctime)s %(levelname)s %(message)s",
 )

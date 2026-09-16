@@ -1,0 +1,30 @@
+name: Build and Push Image
+
+on:
+  push:
+    branches: [dev_00_02_00, master]
+  schedule:
+    # 每周日 UTC 13:00（北京周日 21:00），早于依赖方全量 deploy
+    - cron: "0 13 * * 0"
+  workflow_dispatch:
+
+env:
+  IMAGE: ghcr.io/workers-world/compute_python
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        run: docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build image
+        run: docker build -t $IMAGE:latest .
+
+      - name: Push image
+        run: docker push $IMAGE:latest
