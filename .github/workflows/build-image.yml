@@ -1,30 +1,24 @@
 name: Build and Push Image
 
+# 仅 master 推 GHCR（dev 走 CI smoke，不污染 :latest）
 on:
   push:
-    branches: [dev_00_02_00, master]
+    branches: [master]
   schedule:
     # 每周日 UTC 13:00（北京周日 21:00），早于依赖方全量 deploy
     - cron: "0 13 * * 0"
   workflow_dispatch:
 
-env:
-  IMAGE: ghcr.io/workers-world/compute_python
-
 jobs:
-  build-and-push:
-    runs-on: ubuntu-latest
+  build-push:
     permissions:
       contents: read
       packages: write
-    steps:
-      - uses: actions/checkout@v7
-
-      - name: Log in to GHCR
-        run: docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build image
-        run: docker build -t $IMAGE:latest .
-
-      - name: Push image
-        run: docker push $IMAGE:latest
+    uses: workers-world/container-actions/.github/workflows/container-build-push.yml@actions/v0.1.0
+    secrets:
+      DISPATCH_TOKEN: ${{ secrets.GHA_TOKEN }}
+    with:
+      image: ghcr.io/workers-world/compute_python
+      emit_dispatch: true
+      dispatch_type: compute_python_image_pushed
+      dispatch_repos: workers-world/cpt1
