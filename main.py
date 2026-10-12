@@ -3,8 +3,16 @@
 from __future__ import annotations
 
 import logging
+import re
 import time
 from contextlib import asynccontextmanager
+
+# Strip control chars (incl. CR/LF) so user-influenced values cannot forge log lines.
+_LOG_UNSAFE = re.compile(r"[\x00-\x1f\x7f]")
+
+
+def _sanitize_for_log(value: object) -> str:
+    return _LOG_UNSAFE.sub("?", str(value))
 
 import numpy as np
 from fastapi import FastAPI, HTTPException, Request
@@ -281,7 +289,7 @@ async def optimize_endpoint(req: OptimizeRequest):
 
     logger.info(
         "optimize done best=%s sharpe=%s elapsed=%.3fs",
-        best,
+        _sanitize_for_log(best),
         metrics.get("sharpe_ratio"),
         elapsed,
     )
