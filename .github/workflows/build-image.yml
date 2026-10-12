@@ -14,7 +14,7 @@ jobs:
     permissions:
       contents: read
       packages: write
-    uses: workers-world/container-actions/.github/workflows/container-build-push.yml@actions/v0.1.0
+    uses: workers-world/container-actions/.github/workflows/container-build-push.yml@927e10a8e92c1824e1ba8936790fc06debda6545
     secrets:
       DISPATCH_TOKEN: ${{ secrets.GHA_TOKEN }}
     with:
