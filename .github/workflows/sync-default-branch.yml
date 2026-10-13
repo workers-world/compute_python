@@ -1,0 +1,22 @@
+name: Sync default branch
+
+on:
+  push:
+    branches: ["dev_*"]
+
+permissions: {}
+
+concurrency:
+  group: sync-default-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  sync:
+    permissions: {}
+    uses: workers-world/worker-actions/.github/workflows/worker-sync-default-dev-branch.yml@actions/v0.2.26
+    secrets:
+      GHA_TOKEN: ${{ secrets.GHA_TOKEN }}
+      DEFAULT_BRANCH_BOT_PRIVATE_KEY: ${{ secrets.DEFAULT_BRANCH_BOT_PRIVATE_KEY }}
+      DEFAULT_BRANCH_BOT_APP_ID: ${{ secrets.DEFAULT_BRANCH_BOT_APP_ID }}
+    with:
+      push_branch: ${{ github.ref_name }}

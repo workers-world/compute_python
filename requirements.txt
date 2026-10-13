@@ -2,7 +2,5 @@ fastapi>=0.115.0
 uvicorn[standard]>=0.30.0
 optuna>=4.0.0
 numpy>=2.0.0
-pandas>=2.2.0
 pydantic>=2.0.0
-matplotlib>=3.9.0
 joblib>=1.4.0

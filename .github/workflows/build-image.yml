@@ -1,0 +1,24 @@
+name: Build and Push Image
+
+# 仅 master 推 GHCR（dev 走 CI smoke，不污染 :latest）
+on:
+  push:
+    branches: [master]
+  schedule:
+    # 每周日 UTC 13:00（北京周日 21:00），早于依赖方全量 deploy
+    - cron: "0 13 * * 0"
+  workflow_dispatch:
+
+jobs:
+  build-push:
+    permissions:
+      contents: read
+      packages: write
+    uses: workers-world/container-actions/.github/workflows/container-build-push.yml@927e10a8e92c1824e1ba8936790fc06debda6545
+    secrets:
+      DISPATCH_TOKEN: ${{ secrets.GHA_TOKEN }}
+    with:
+      image: ghcr.io/workers-world/compute_python
+      emit_dispatch: true
+      dispatch_type: compute_python_image_pushed
+      dispatch_repos: workers-world/cpt1

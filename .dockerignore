@@ -1,0 +1,16 @@
+venv/
+.venv/
+__pycache__/
+*.pyc
+.git/
+.github/
+.idea/
+.cursor/
+graft/
+*.log
+.DS_Store
+.dockerignore
+.gitignore
+.ignore
+start.sh
+strategy_optimizer.log
