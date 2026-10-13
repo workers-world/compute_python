@@ -1,0 +1,10 @@
+{
+  "name": "compute_python",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Python compute / WFO service (container)",
+  "scripts": {
+    "check": "python3 -m py_compile main.py engine.py models.py optimizer.py wfo.py",
+    "test": "python3 -m py_compile main.py engine.py models.py optimizer.py wfo.py"
+  }
+}
