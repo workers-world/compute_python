@@ -13,7 +13,7 @@ concurrency:
 jobs:
   sync:
     permissions: {}
-    uses: workers-world/worker-actions/.github/workflows/worker-sync-default-dev-branch.yml@actions/v0.2.38
+    uses: workers-world/worker-actions/.github/workflows/worker-sync-default-dev-branch.yml@actions/v0.2.40
     secrets:
       GHA_TOKEN: ${{ secrets.GHA_TOKEN }}
       DEFAULT_BRANCH_BOT_PRIVATE_KEY: ${{ secrets.DEFAULT_BRANCH_BOT_PRIVATE_KEY }}
