@@ -21,7 +21,7 @@ jobs:
       issues: write
       actions: write
       checks: read
-    uses: workers-world/worker-actions/.github/workflows/worker-ci.yml@actions/v0.2.41
+    uses: workers-world/worker-actions/.github/workflows/worker-ci.yml@actions/v0.2.47
     secrets:
       GHA_TOKEN: ${{ secrets.GHA_TOKEN }}
       RELEASE_BOT_PRIVATE_KEY: ${{ secrets.RELEASE_BOT_PRIVATE_KEY }}
