@@ -1,4 +1,8 @@
 {
   "type": "tool",
-  "note": "container image source; .github 自治（container-actions CI）"
+  "note": "container image source; .github 自治（container-actions CI）",
+  "deps": [
+    "container-actions",
+    "worker-actions"
+  ]
 }
